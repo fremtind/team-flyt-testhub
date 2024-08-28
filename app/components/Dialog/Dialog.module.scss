@@ -1,0 +1,38 @@
+@use "@fremtind/jkl-core/jkl";
+
+.overlay {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: #2224;
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.dialog {
+    position: fixed;
+    display: flex;
+    flex-direction: column;
+    background-color: jkl.$color-hvit;
+    padding: jkl.$spacing-xl;
+    border-radius: 8px;
+    max-height: 80vh;
+    overflow-y: auto;
+    border: none;
+
+    @include jkl.small-device {
+        position: fixed;
+        left: 0;
+        bottom: 0;
+        max-width: 88vw;
+    }
+}
+
+.buttonRow {
+    display: flex;
+    flex-direction: row-reverse;
+}
