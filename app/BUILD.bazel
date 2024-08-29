@@ -1,0 +1,24 @@
+package(default_visibility = ["//apps/team-bm/bm-testhub-frontend:__subpackages__"])
+
+load("@aspect_rules_js//js:defs.bzl", "js_library")
+
+SRC_PATTERNS = [
+    "**/*.tsx",
+    "**/*.ts",
+    "**/*.css",
+]
+
+js_library(
+    name = "app",
+    srcs = glob(SRC_PATTERNS),
+    deps = [
+        "//apps/team-bm/bm-testhub-frontend:node_modules/@fremtind",
+        "//apps/team-bm/bm-testhub-frontend:node_modules/@remix-run/react",
+        "//apps/team-bm/bm-testhub-frontend:node_modules/@remix-run/css-bundle",
+        "//apps/team-bm/bm-testhub-frontend:node_modules/@remix-run/node",
+        "//apps/team-bm/bm-testhub-frontend:node_modules/zod",
+        "//apps/team-bm/bm-testhub-frontend:node_modules/remix-utils",
+        "//apps/team-bm/bm-testhub-frontend:node_modules/lodash",
+        "//apps/team-bm/bm-testhub-frontend:node_modules/date-fns",
+    ],
+)

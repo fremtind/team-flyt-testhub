@@ -1,40 +1,32 @@
 # Welcome to Remix!
 
-- 📖 [Remix docs](https://remix.run/docs)
+- [Remix Docs](https://remix.run/docs)
+
+## Setup
+
+```sh
+cp .env.example .env
+pnpm install
+```
+
+Fill in .env with the correct values 🧙
 
 ## Development
 
-Run the dev server:
-
-```shellscript
-npm run dev
-```
-
-## Deployment
-
-First, build your app for production:
+From your terminal:
 
 ```sh
-npm run build
+ibazel run dev
 ```
 
-Then run the app in production mode:
-
-```sh
-npm start
-```
+This starts your app in development mode, rebuilding assets on file changes.
 
 Now you'll need to pick a host to deploy it to.
 
-### DIY
+### Build
 
-If you're familiar with deploying Node applications, the built-in Remix app server is production-ready.
+Appen bygges med GH-actions, og deployes via BUILD.bazel-filen.
 
-Make sure to deploy the output of `npm run build`
-
-- `build/server`
-- `build/client`
-
-## Styling
-
-This template comes with [Tailwind CSS](https://tailwindcss.com/) already configured for a simple default starting experience. You can use whatever css framework you prefer. See the [Vite docs on css](https://vitejs.dev/guide/features.html#css) for more information.
+```sh
+bazel build :app
+```
