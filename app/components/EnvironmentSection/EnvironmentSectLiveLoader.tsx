@@ -19,7 +19,7 @@ import { format } from "date-fns";
 import { ContextualMenu, ContextualMenuItem } from "@fremtind/jkl-contextual-menu-react";
 import { Dialog } from "../Dialog";
 import { ModalInstance } from "@fremtind/jkl-modal-react";
-import { LoaderData } from "~/routes/branches.$project.$branchName/loader";
+import { LoaderData } from "~/routes/$project.$branchName/loader";
 
 interface Props {
     environment: EnvironmentDetailsStatus;
@@ -61,15 +61,16 @@ export const EnvironmentSectionDynamic = ({ environment }: Props) => {
     const liveLoaderData: LiveLoaderData = JSON.parse(liveLoader ?? "null");
 
     const data = liveLoaderData?.length ? liveLoaderData : loaderData.environments;
-    console.log("EnvironmentSectionDynamic", data);
 
     const appDialogRef = useRef<ModalInstance | null>();
     const jsonDialogRef = useRef<ModalInstance | null>();
     const submit = useSubmit();
 
-    const frontendApp = getAppFromEnvironment(environment.apps, "forsikring-bm-web-frontend");
-    const webApp = getAppFromEnvironment(environment.apps, "forsikring-bm-web");
-    const apiGwApp = getAppFromEnvironment(environment.apps, "forsikring-bm-api-gw");
+    const frontendApp = getAppFromEnvironment(environment.apps, "flyt-frontend");
+    const backendApp = getAppFromEnvironment(environment.apps, "flyt-backend");
+    const webApp = getAppFromEnvironment(environment.apps, "flyt-jms");
+    const apiGwApp = getAppFromEnvironment(environment.apps, "flyt-gateway");
+
 
     const handleDeleteEnvironment = () => {
         if (!confirm("Er du sikker på at du vil slette dette miljøet?")) {
@@ -121,8 +122,6 @@ export const EnvironmentSectionDynamic = ({ environment }: Props) => {
     const fipAppUrl = getEnvironmentVariable(webApp?.env ?? [], "FORSIKRING_FIP_URL");
 
     const frontendAppHostUrls = getHostUrls(frontendApp.routes ?? []);
-
-    const sb1LoginHost = getHost("sb1-kunde", frontendAppHostUrls);
 
     const copyJsonToClipboard = () => {
         const json = JSON.stringify(environment, null, 2);
@@ -190,27 +189,6 @@ export const EnvironmentSectionDynamic = ({ environment }: Props) => {
                         )}
                 </div>
                 <div className="flex gap-24 text-base items-center">
-                    <a
-                        href={generateSwaggerUrl(sb1LoginHost)}
-                        className="jkl-nav-link mb-16 inline-block"
-                        rel="noreferrer"
-                        target="_blank"
-                    >
-                        Swagger
-                    </a>
-                    {apiGwApp?.routes?.length ? (
-                        <>
-                            <br />
-                            <a
-                                href={apiGwApp.routes.at(0)?.host + "/gw/docs/swagger-ui/index.html"}
-                                className="jkl-nav-link mb-16 inline-block"
-                                target="_blank"
-                                rel="noreferrer"
-                            >
-                                API GW Swagger
-                            </a>
-                        </>
-                    ) : null}
                     <br />
                     <a
                         href={generateHumioUrl(environment.name)}

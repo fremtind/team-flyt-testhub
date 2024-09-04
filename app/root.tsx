@@ -27,7 +27,6 @@ import tooltipStyles from "@fremtind/jkl-tooltip/tooltip.min.css";
 import webfontStyles from "@fremtind/jkl-webfonts/webfonts.min.css";
 import { ToastProvider } from "@fremtind/jkl-toast-react";
 import { Header } from "./components/Header";
-import { Footer } from "./components/Footer";
 
 const jklStyles = [
     breadcrumbStyles,
@@ -82,7 +81,6 @@ export default function App() {
                         </ToastProvider>
                     </div>
 
-                    <Footer />
                 </div>
                 <ScrollRestoration />
                 <Scripts />

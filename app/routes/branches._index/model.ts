@@ -1,9 +1,10 @@
 import type { EnvironmentOverviewStatus } from "~/model/gen";
 
-export interface TicketWithEnvironment {
-    ticket: {
-        id: string;
-        title: string;
+export interface BranchWithEnvironments {
+    branch: {
+        name: string;
+        project: string;
     };
     environments: Array<EnvironmentOverviewStatus>;
+    ticket?: string;
 }

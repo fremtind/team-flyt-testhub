@@ -20,7 +20,7 @@ export default function BranchOverview() {
             <main className="flex flex-col container gap-40 mx-auto">
                 <section>
                     <div className="mb-40 flex justify-between">
-                        <h2 className="j-h2">Jira Tickets</h2>
+                        <h2 className="j-h2">Brancher</h2>
 
                         <Link to={`/new?`} data-density="compact" className="jkl-button jkl-button--secondary">
                             Nytt egendefinert miljø
@@ -35,7 +35,7 @@ export default function BranchOverview() {
                     >
                         <Await resolve={loaderData.branchData}>
                             {(data) => {
-                                return <View collection={data.ticketCollection} projects={data.projects} />;
+                                return <View collection={data.branchCollection} projects={data.projects} />;
                             }}
                         </Await>
                     </Suspense>

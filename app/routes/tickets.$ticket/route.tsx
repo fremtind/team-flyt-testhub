@@ -1,19 +1,16 @@
 import { useLoaderData, useParams } from "@remix-run/react";
-import { getJiraIssueFromString } from "../../common/utils/jira";
-import { useRef, useState } from "react";
 import { EnvironmentSection } from "../../components/EnvironmentSection/EnvironmentSection";
 import { NewEnvironmentButton } from "../../components/NewEnvironmentButton";
 import type { LoaderData } from "./loader";
-import { services } from "../_environments.new/model";
+import { getIssue } from "~/services/jira";
 
 export { action } from "./action";
 export { loader } from "./loader";
 
-const BranchView = () => {
-    const params = useParams<"project" | "branchName">();
+const ProjectView = () => {
+    const params = useParams<"ticket">();
 
     const loaderData = useLoaderData<LoaderData>();
-    console.log(loaderData);
 
     const data = loaderData.environments;
 
@@ -27,34 +24,26 @@ const BranchView = () => {
     const environmentNames = environmentsSortedByCreation.map((env) => env.environment.name);
     console.log(environmentNames)
 
-    const jiraIssue = getJiraIssueFromString(params.branchName!);
+    const jiraIssue = params.ticket; //getIssue(params.branchName!);
+    console.log(jiraIssue);
 
-    const service = services.find((s) => s.repository === params.project);
 
     return (
         <>
             <main className="container mx-auto">
                 <div className="flex mb-40 gap-x-16 flex-wrap">
-                    <h2 className="j-h2 flex-1">{params.branchName}</h2>
-                    {loaderData.githubBranch && params.branchName && service && (
+                    <h2 className="j-h2 flex-1">{params.ticket}</h2>
+                    {params.ticket && (
                         <NewEnvironmentButton
                             environmentNames={environmentNames}
-                            project={service.inputName}
+                            project={params.ticket}
                             withModal={true}
                         />
                     )}
                     <div className="w-full">
-                        <a
-                            href={`https://github.com/fremtind/${params.project}/tree/${params.branchName}`}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="jkl-link mr-16"
-                        >
-                            GitHub repo
-                        </a>
                         {jiraIssue && (
                             <a
-                                href={`https://fremtind.atlassian.net/browse/${jiraIssue.toLocaleUpperCase()}`}
+                                href={`https://fremtind.atlassian.net/browse/${jiraIssue}`}
                                 target="_blank"
                                 rel="noreferrer"
                                 className="jkl-link mr-16"
@@ -101,9 +90,9 @@ const BranchView = () => {
                                 </defs>
                             </svg>
                             Ingen miljøer enda <br />
-                            {loaderData.githubBranch && params.branchName && service && (
+                            {params.ticket && (
                                 <NewEnvironmentButton
-                                    project={service.inputName}
+                                    project={params.ticket}
                                     density="comfortable"
                                     className="mt-12"
                                 />
@@ -116,4 +105,4 @@ const BranchView = () => {
     );
 };
 
-export default BranchView;
+export default ProjectView;

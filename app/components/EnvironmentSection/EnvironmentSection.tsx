@@ -1,6 +1,5 @@
 import { useRef } from "react";
 import { useSubmit } from "@remix-run/react";
-import { isDefined } from "../../common/utils/isDefined";
 import { getFipLabelByUrl } from "~/common/utils/fip";
 import type { EnvironmentDetailsStatus, RoutesInfo } from "../../model/gen";
 import { InfoTag, SuccessTag } from "@fremtind/jkl-tag-react";
@@ -8,62 +7,27 @@ import { PrimaryButton, SecondaryButton } from "@fremtind/jkl-button-react";
 
 import {
     calculateAppReadiness,
-    generateBankIdLoginHostUrl,
     generateHumioUrl,
-    generateMockloginHostUrl,
-    generateSwaggerUrl,
     getAppFromEnvironment,
     getEnvironmentVariable,
-    getHostUrls,
 } from "../../common/utils/environments";
 import { format } from "date-fns";
-import type { ValuePair } from "@fremtind/jkl-core";
-import { DistributorLink } from "../DistributorLink";
-import { RadgiverLogin } from "../RadgiverLogin";
 import { ContextualMenu, ContextualMenuItem } from "@fremtind/jkl-contextual-menu-react";
 import { Dialog } from "../Dialog";
 import { ModalInstance } from "@fremtind/jkl-modal-react";
 
 interface Props {
     environment: EnvironmentDetailsStatus;
-    mocklogin: {
-        dnb: string;
-        sb1: string;
-    };
-    selectedUser: string;
 }
 
-const hostNameLabelMap: Record<string, string> = {
-    "dnb-kunde": "DNB",
-    "dnb-radgiver": "DNB Rådgiver",
-    "sb1-kunde": "SB1",
-    "sb1-radgiver": "SB1 Rådgiver",
-};
-
-const getHost = (hostKey: keyof typeof hostNameLabelMap, hosts: Array<RoutesInfo>) => {
-    const host = hosts.find((host) => host.name === hostKey);
-
-    if (!host) {
-        return "";
-    }
-
-    if (!host.name || !hostNameLabelMap[host.name]) {
-        return "";
-    }
-
-    return host.host;
-};
-
-export const EnvironmentSection = ({ environment, mocklogin, selectedUser }: Props) => {
+export const EnvironmentSection = ({ environment }: Props) => {
     const appDialogRef = useRef<ModalInstance | null>();
     const jsonDialogRef = useRef<ModalInstance | null>();
     const dialogRef = useRef<ModalInstance | null>();
-    const userOrg = selectedUser ? selectedUser : "05876798923";
 
     const submit = useSubmit();
 
-    const frontendApp = getAppFromEnvironment(environment.apps, "forsikring-bm-web-frontend");
-    const loginApp = getAppFromEnvironment(environment.apps, "forsikring-bm-web-login");
+    const frontendApp = getAppFromEnvironment(environment.apps, "flyt-frontend");
     const webApp = getAppFromEnvironment(environment.apps, "forsikring-bm-web");
     const apiGwApp = getAppFromEnvironment(environment.apps, "forsikring-bm-api-gw");
 
@@ -116,24 +80,6 @@ export const EnvironmentSection = ({ environment, mocklogin, selectedUser }: Pro
 
     const fipAppUrl = getEnvironmentVariable(webApp?.env ?? [], "FORSIKRING_FIP_URL");
 
-    const frontendAppHostUrls = getHostUrls(frontendApp.routes ?? []);
-    const loginAppHostUrls = getHostUrls(loginApp?.routes ?? []);
-
-    const sb1LoginHost = getHost("sb1-kunde", frontendAppHostUrls);
-    const dnbLoginHost = getHost("dnb-kunde", frontendAppHostUrls);
-
-    const createMockloginUrl = generateMockloginHostUrl(mocklogin, userOrg);
-
-    const advisorHosts = [
-        {
-            value: getHost("sb1-radgiver", frontendAppHostUrls),
-            label: "SpareBank1",
-        },
-        {
-            value: getHost("dnb-radgiver", frontendAppHostUrls),
-            label: "DNB",
-        },
-    ].filter((host): host is ValuePair => isDefined(host.value));
 
     const copyJsonToClipboard = () => {
         const json = JSON.stringify(environment, null, 2);
@@ -195,83 +141,8 @@ export const EnvironmentSection = ({ environment, mocklogin, selectedUser }: Pro
                             </>
                         )}
                 </div>
-                <div>
-                    <ul className="flex flex-wrap gap-x-16 gap-y-8">
-                        <li>
-                            <DistributorLink
-                                key={`test${environment.name}+${sb1LoginHost}}`}
-                                density="compact"
-                                href={createMockloginUrl("sb1", sb1LoginHost)}
-                                distributor="sb1"
-                            >
-                                SpareBank 1
-                            </DistributorLink>
-                        </li>
-                        <li>
-                            <DistributorLink
-                                key={`${environment.name}+${dnbLoginHost}}`}
-                                density="compact"
-                                href={createMockloginUrl("dnb", dnbLoginHost)}
-                                distributor="dnb"
-                            >
-                                DNB
-                            </DistributorLink>
-                        </li>
-                        <li>
-                            <DistributorLink
-                                key={`${environment.name}+${sb1LoginHost}+bankid`}
-                                density="compact"
-                                href={generateBankIdLoginHostUrl(getHost("sb1-kunde", loginAppHostUrls), sb1LoginHost)}
-                                distributor="sb1"
-                            >
-                                SpareBank 1 (BankID)
-                            </DistributorLink>
-                        </li>
-                        <li>
-                            <DistributorLink
-                                key={`${environment.name}+${dnbLoginHost}}+bankid`}
-                                density="compact"
-                                href={generateBankIdLoginHostUrl(getHost("dnb-kunde", loginAppHostUrls), dnbLoginHost)}
-                                distributor="dnb"
-                            >
-                                DNB (BankID)
-                            </DistributorLink>
-                        </li>
-                        <li>
-                            <SecondaryButton
-                                density="compact"
-                                onClick={() => {
-                                    dialogRef.current.show();
-                                }}
-                            >
-                                Rådgiver login
-                            </SecondaryButton>
-                        </li>
-                    </ul>
-                </div>
+                
                 <div className="flex gap-24 text-base items-center">
-                    <a
-                        href={generateSwaggerUrl(sb1LoginHost)}
-                        className="jkl-nav-link inline-block"
-                        rel="noreferrer"
-                        target="_blank"
-                    >
-                        Swagger
-                    </a>
-                    {apiGwApp?.routes?.length ? (
-                        <>
-                            <br />
-                            <a
-                                href={apiGwApp.routes.at(0)?.host + "/gw/docs/swagger-ui/index.html"}
-                                className="jkl-nav-link inline-block"
-                                target="_blank"
-                                rel="noreferrer"
-                            >
-                                API GW Swagger
-                            </a>
-                        </>
-                    ) : null}
-                    <br />
                     <a
                         href={generateHumioUrl(environment.name)}
                         className="jkl-nav-link"
@@ -287,20 +158,6 @@ export const EnvironmentSection = ({ environment, mocklogin, selectedUser }: Pro
             )}
                 </div>
             </div>
-            <Dialog
-                dialogRef={(instanse) => {
-                    dialogRef.current = instanse;
-                }}
-                onConfirm={() => {
-                    dialogRef.current?.hide();
-                }}
-                onCancel={() => {
-                    dialogRef.current?.hide();
-                }}
-                title={`Rådgiver login: ${environment.name}`}
-            >
-                <RadgiverLogin values={advisorHosts} />
-            </Dialog>
 
             <Dialog
                 title="JSON"

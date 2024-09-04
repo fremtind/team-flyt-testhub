@@ -6,14 +6,12 @@ import type { FunctionComponent, PropsWithChildren } from "react";
 import type { Density } from "@fremtind/jkl-core";
 import { useEffect, useState } from "react";
 import { useToast } from "@fremtind/jkl-toast-react";
-import { getJiraIssueFromString } from "../../common/utils/jira";
 import { Select } from "@fremtind/jkl-select-react";
 import type { Fip } from "~/common/utils/fip";
 import { fipMap } from "~/common/utils/fip";
 
 interface Props {
     project: string;
-    branch: string;
     withModal?: boolean;
     density?: Density;
     className?: string;
@@ -22,7 +20,6 @@ interface Props {
 
 export const NewEnvironmentButton: FunctionComponent<PropsWithChildren<Props>> = ({
     project,
-    branch,
     withModal,
     children,
     className = "",
@@ -45,16 +42,13 @@ export const NewEnvironmentButton: FunctionComponent<PropsWithChildren<Props>> =
         }
         setEnvLength(environmentNames ? environmentNames?.length : 0);
     }, [navigation, add, isDialogOpen, environmentNames, envLenght]);
-    const jiraIssue = getJiraIssueFromString(branch);
-    const splitbranch = branch.split(";");
-    const branchName = splitbranch[0].toLowerCase();
-    const shortenedBranchName = branchName.substring(0, Math.min(branchName.length, 15));
+    const jiraTicket = project
     const splitEnvironments = environmentNames?.map((env) => env.split("-"));
     splitEnvironments?.forEach((env) => {
         env.pop();
         env.shift();
         const envName = env.join("-");
-        if (envName?.includes(shortenedBranchName)) {
+        if (envName?.includes(jiraTicket)) {
             environmentNameExists = true;
         }
     });
@@ -64,9 +58,9 @@ export const NewEnvironmentButton: FunctionComponent<PropsWithChildren<Props>> =
             <Form action="." method="POST">
                 <TextInput
                     hidden
-                    name={project}
+                    name="flyt-backend"
                     className="jkl-sr-only"
-                    value={branch}
+                    value={project}
                     readOnly
                     labelProps={{ srOnly: true }}
                     label="project"
@@ -84,7 +78,7 @@ export const NewEnvironmentButton: FunctionComponent<PropsWithChildren<Props>> =
                     //            : branchName
                     //   }
                     defaultValue={
-                        environmentNameExists ? `${shortenedBranchName}-${envLenght + 1}` : shortenedBranchName
+                        environmentNameExists ? `${jiraTicket}-${envLenght + 1}` : jiraTicket
                     }
                     labelProps={{ srOnly: true }}
                     label="Miljønavn"
@@ -134,7 +128,7 @@ export const NewEnvironmentButton: FunctionComponent<PropsWithChildren<Props>> =
                         //        : branchName
                         //    }
                         defaultValue={
-                            environmentNameExists ? `${shortenedBranchName}-${envLenght + 1}` : shortenedBranchName
+                            environmentNameExists ? `${jiraTicket}-${envLenght + 1}` : jiraTicket
                         }
                         className="mb-12"
                         autoFocus
@@ -143,7 +137,7 @@ export const NewEnvironmentButton: FunctionComponent<PropsWithChildren<Props>> =
                         hidden
                         name={project}
                         className="jkl-sr-only"
-                        value={branch}
+                        value={project}
                         readOnly
                         labelProps={{ srOnly: true }}
                         label="project"

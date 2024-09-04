@@ -16,12 +16,21 @@ import { fipMap } from "~/common/utils/fip";
 import { secretsForNamespace, redisResources } from "~/common/redisinfo";
 
 export const getEnvironments = () => {
-    return testhubApi.get<EnvironmentListResponse>(`environments/${getRequiredEnvVar("TESTHUB_TEAM")}`);
+    return testhubApi.get<EnvironmentListResponse>(`environments/${getRequiredEnvVar("TESTHUB_TEAM")}`)
+        .catch((e) => {
+            console.error("could not fetch environments", e);
+            return { devnamespaces: [] };
+        }
+    );
 };
 
 export const getEnvironmentDetails = (environmentNamespace: string) => {
     return testhubApi.get<EnvironmentStatusResponse>(
         `environments/${getRequiredEnvVar("TESTHUB_TEAM")}/${environmentNamespace}`
+    ).catch((e) => {
+        console.error("could not fetch environment details", e);
+        return <EnvironmentStatusResponse>{ environment: {} };
+        }
     );
 };
 
@@ -56,16 +65,8 @@ const serviceSchema = z
     .optional();
 
 const schema = z.object({
-    "bm-web-frontend": serviceSchema,
-    "bm-web": serviceSchema,
-    "bm-web-login": serviceSchema,
-    "bm-avtale": serviceSchema,
-    "bm-dokumenter": serviceSchema,
-    "bm-folkeregister": serviceSchema,
-    "bm-organisasjon": serviceSchema,
-    "bm-api-gw": serviceSchema,
-    "bm-kjop-frontend": serviceSchema,
-    "bm-kjop-api": serviceSchema,
+    "flyt-frontend": serviceSchema,
+    "flyt-backend": serviceSchema,
     hoursToLive: z.coerce.number().default(24 * 5),
     fip: z.string({ required_error: "Du må velge FIP-miljø" }).nonempty({ message: "Du må velge FIP-miljø" }),
     context: z

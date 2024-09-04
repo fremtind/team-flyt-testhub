@@ -58,7 +58,6 @@ const handleDeleteEnvironment = async (request: Request) => {
     try {
         // Du prøvde å få sletting til å fungere uten å kaste feil...
         const res = await deleteEnvironment(environmentName.toString());
-        console.log(res);
     } catch (e) {
         console.log(e);
     }

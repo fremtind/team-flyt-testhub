@@ -4,13 +4,13 @@ import { CloseIcon } from "@fremtind/jkl-icons-react";
 import { SuccessTag } from "@fremtind/jkl-tag-react";
 import { TextInput } from "@fremtind/jkl-text-input-react";
 import { ToggleSwitch } from "@fremtind/jkl-toggle-switch-react";
-import type { TicketWithEnvironment } from "./model";
+import type { BranchWithEnvironments } from "./model";
 import { Select } from "@fremtind/jkl-select-react";
 import { Loader } from "@fremtind/jkl-loader-react";
 import "./View.css";
 
 interface Props {
-    collection: Array<TicketWithEnvironment>;
+    collection: Array<BranchWithEnvironments>;
     projects: Array<string>;
 }
 
@@ -27,11 +27,11 @@ export const View = (props: Props) => {
                 return true;
             }
 
-            return env.ticket.id === selectedProject;
+            return env.branch.project === selectedProject;
         })
         .filter((env) => {
             return (
-                env.ticket.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                env.branch.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 env.environments
                     .map((e) => e.name)
                     .join(" ")
@@ -47,7 +47,7 @@ export const View = (props: Props) => {
             return env.environments.length;
         });
     const sortedBranches = filteredBranches.sort((a, b) => {
-        return a.ticket.title.localeCompare(b.ticket.title);
+        return a.branch.name.localeCompare(b.branch.name);
     });
 
     return (
@@ -73,9 +73,9 @@ export const View = (props: Props) => {
             </div>
             <ul>
                 {sortedBranches.map((env) => (
-                    <li key={env.ticket.title + env.ticket.title} className="mb-12">
+                    <li key={env.branch.name + env.branch.project} className="mb-12">
                         <Link
-                            to={`tickets/${env.ticket.id}`}
+                            to={`${env.branch.project}/${env.branch.name}`}
                             className="jkl-nav-card p-24"
                             prefetch="intent"
                             onClick={(e) => {
@@ -84,10 +84,10 @@ export const View = (props: Props) => {
                         >
                             <div className="flex flex-wrap justify-between items-center">
                                 <div className="jkl-nav-card__content flex-col gap-0">
-                                    <h3 className="jkl-nav-card__link">{env.ticket.title}</h3>
+                                    <h3 className="jkl-nav-card__link">{env.branch.name}</h3>
 
                                     <div className="flex">
-                                        <p className="text-stein j-small">{env.ticket.id}</p>
+                                        <p className="text-stein j-small">{env.branch.project}</p>
                                     </div>
                                 </div>
                                 <Loader

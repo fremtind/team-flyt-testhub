@@ -2,57 +2,49 @@ import { defer } from "@remix-run/node";
 import { getJiraIssueFromString } from "../../common/utils/jira";
 import { getEnvironments } from "../../services/environments";
 import { getBranchesForMultipleRepositories } from "../../services/github";
-import type { BranchWithEnvironments } from "./model";
+import type { TicketWithEnvironment } from "./model";
+import { getIssuesFromColumn } from "~/services/jira";
 
 export const loader = async () => {
-    const dataFetcher = new Promise<{ projects: string[]; branchCollection: BranchWithEnvironments[] }>(
+    const dataFetcher = new Promise<{ projects: string[]; ticketCollection: TicketWithEnvironment[] }>(
         async (resolve) => {
-            const branches = await getBranchesForMultipleRepositories([
-                "bm-web-frontend",
-                "bm-web",
-                "bm-web-login",
-                "bm-agreements",
-                "bm-documents",
-                "bm-folkeregister",
-                "bm-organization",
-                "bm-api-gw",
-                "bm-kjop",
-            ]);
-            const relevantBranches = branches.flat().filter((branch) => {
-                return ![/dependabot/].some((re) => re.test(branch?.name));
-            });
+            const ticketStatus = ["Klar for test"];
 
-            const branchCollection: Array<BranchWithEnvironments> = relevantBranches.map((branch) => ({
-                branch,
-                environments: [],
-                ticket: getJiraIssueFromString(branch.name) ?? undefined,
+            const tickets = await getIssuesFromColumn(ticketStatus[0]);
+
+            const ticketCollection: Array<TicketWithEnvironment> = tickets.map((ticket) => ({
+                ticket,
+                environments: []
             }));
 
             const devEnvironments = await getEnvironments();
 
             devEnvironments.devnamespaces.forEach((env) => {
+                if (!env.appAnnotations) {
+                    return;
+                }
+
                 Object.entries(env.appAnnotations).forEach(([appName, annotations]) => {
-                    if (!annotations.branch) {
+                    if (!annotations.branch || !annotations.branch.includes("main")) {
                         return;
                     }
 
-                    const envProject = appName.replace("forsikring-", "");
                     const branchName = annotations.branch;
 
-                    const branchIndex = branchCollection.findIndex(
-                        (branch) => branch.branch.name === branchName && branch.branch.project === envProject
+                    const branchIndex = ticketCollection.findIndex(
+                        (ticket) => ticket.ticket.id === branchName
                     );
 
                     if (branchIndex === -1) {
                         return;
                     }
 
-                    branchCollection[branchIndex].environments.push(env);
+                    ticketCollection[branchIndex].environments.push(env);
                 });
             });
 
-            const projects = [...new Set(branchCollection.map((project) => project.branch.project))];
-            resolve({ projects, branchCollection });
+            const projects = [...new Set(ticketCollection.map((project) => project.ticket.id))];
+            resolve({ projects, ticketCollection: ticketCollection });
         }
     );
 

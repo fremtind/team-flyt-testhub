@@ -101,7 +101,7 @@ const NewCustomEnvironment = () => {
                         <SuccessMessageBox className="mt-24">
                             Prosjektet er opprettet.
                             <br />
-                            <Link to={`/branches`} className="jkl-link">
+                            <Link to={`/`} className="jkl-link">
                                 Gå tilbake til forsiden
                             </Link>
                         </SuccessMessageBox>
