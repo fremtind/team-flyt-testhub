@@ -47,6 +47,8 @@ export const createEnvironment = async (data: EnvironmentDeploymentRequest) => {
         secrets: secretsForNamespace,
         localServicePaths: localServices,
         additionalKubernetesResources: redisResources,
+        omitNamespacePostfix: true,
+        omitNamespacePrefix: true,
     };
     
     return testhubApi.post<EnvironmentStatusResponse, EnvironmentDeploymentRequest>(
@@ -67,6 +69,9 @@ const serviceSchema = z
 const schema = z.object({
     "flyt-frontend": serviceSchema,
     "flyt-backend": serviceSchema,
+    "flyt-gateway": serviceSchema,
+    "flyt-jms": serviceSchema,
+    // "flyt-camunda-webapps": serviceSchema,
     hoursToLive: z.coerce.number().default(24 * 5),
     fip: z.string({ required_error: "Du må velge FIP-miljø" }).nonempty({ message: "Du må velge FIP-miljø" }),
     context: z

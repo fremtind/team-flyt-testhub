@@ -10,10 +10,8 @@ import { PrimaryButton, SecondaryButton } from "@fremtind/jkl-button-react";
 import {
     calculateAppReadiness,
     generateHumioUrl,
-    generateSwaggerUrl,
     getAppFromEnvironment,
     getEnvironmentVariable,
-    getHostUrls,
 } from "../../common/utils/environments";
 import { format } from "date-fns";
 import { ContextualMenu, ContextualMenuItem } from "@fremtind/jkl-contextual-menu-react";
@@ -23,44 +21,20 @@ import { LoaderData } from "~/routes/$project.$branchName/loader";
 
 interface Props {
     environment: EnvironmentDetailsStatus;
-    mocklogin: {
-        dnb: string;
-        sb1: string;
-    };
-    selectedUser: string;
     modalInstance: any;
 }
-
-const hostNameLabelMap: Record<string, string> = {
-    "dnb-kunde": "DNB",
-    "dnb-radgiver": "DNB Rådgiver",
-    "sb1-kunde": "SB1",
-    "sb1-radgiver": "SB1 Rådgiver",
-};
-
-const getHost = (hostKey: keyof typeof hostNameLabelMap, hosts: Array<RoutesInfo>) => {
-    const host = hosts.find((host) => host.name === hostKey);
-
-    if (!host) {
-        return "";
-    }
-
-    if (!host.name || !hostNameLabelMap[host.name]) {
-        return "";
-    }
-
-    return host.host;
-};
 
 type LiveLoaderData = LoaderData["environments"] | null;
 
 export const EnvironmentSectionDynamic = ({ environment }: Props) => {
-    const params = useParams<"project" | "branchName">();
+    console.log("environment", environment);
+    const params = useParams<"ticket">();
     const loaderData = useLoaderData<LoaderData>();
-    const liveLoader = useEventSource(`/events/branches/${params.branchName}`);
+    const liveLoader = useEventSource(`events/tickets/${params.ticket}`);
     const liveLoaderData: LiveLoaderData = JSON.parse(liveLoader ?? "null");
 
     const data = liveLoaderData?.length ? liveLoaderData : loaderData.environments;
+    console.log("data", data);
 
     const appDialogRef = useRef<ModalInstance | null>();
     const jsonDialogRef = useRef<ModalInstance | null>();

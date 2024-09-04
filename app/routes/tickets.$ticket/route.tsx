@@ -22,10 +22,8 @@ const ProjectView = () => {
     });
 
     const environmentNames = environmentsSortedByCreation.map((env) => env.environment.name);
-    console.log(environmentNames)
 
     const jiraIssue = params.ticket; //getIssue(params.branchName!);
-    console.log(jiraIssue);
 
 
     return (

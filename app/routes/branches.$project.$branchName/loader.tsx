@@ -16,6 +16,7 @@ export interface LoaderData {
 
 export const loader = async ({ params }: LoaderArgs) => {
     const environments = await getEnvironments();
+    console.log(environments);
 
     const branchName = params.branchName ?? "";
     const projectName = params.project;
@@ -29,8 +30,7 @@ export const loader = async ({ params }: LoaderArgs) => {
     if (jiraIssue) {
         filterParams.push(jiraIssue);
     }
-
-    console.log(environments);
+    console.log("filterParams",filterParams);
 
     const relevantEnvironments = environments.devnamespaces.filter((env) => {
         if (!env.appAnnotations) {

@@ -1,3 +1,4 @@
+import { uniqueNamesGenerator, Config, adjectives, colors, animals } from 'unique-names-generator';
 import { PrimaryButton } from "@fremtind/jkl-button-react";
 import { useNavigation, Form } from "@remix-run/react";
 import { Modal } from "../Modal";
@@ -9,6 +10,7 @@ import { useToast } from "@fremtind/jkl-toast-react";
 import { Select } from "@fremtind/jkl-select-react";
 import type { Fip } from "~/common/utils/fip";
 import { fipMap } from "~/common/utils/fip";
+import { toLower } from "lodash";
 
 interface Props {
     project: string;
@@ -35,6 +37,14 @@ export const NewEnvironmentButton: FunctionComponent<PropsWithChildren<Props>> =
 
     const { add } = useToast();
 
+    const nameGenConfig: Config = {
+        dictionaries: [animals],
+        separator: '-',
+        length: 1,
+      };
+
+    const name = uniqueNamesGenerator(nameGenConfig);
+
     useEffect(() => {
         if (navigation.state === "loading" && isDialogOpen) {
             add("Miljø opprettet", { variant: "success", timeout: 7500 });
@@ -42,7 +52,8 @@ export const NewEnvironmentButton: FunctionComponent<PropsWithChildren<Props>> =
         }
         setEnvLength(environmentNames ? environmentNames?.length : 0);
     }, [navigation, add, isDialogOpen, environmentNames, envLenght]);
-    const jiraTicket = project
+    const jiraTicket = toLower(project)
+    const projectName = jiraTicket  + "-" + name;
     const splitEnvironments = environmentNames?.map((env) => env.split("-"));
     splitEnvironments?.forEach((env) => {
         env.pop();
@@ -78,7 +89,7 @@ export const NewEnvironmentButton: FunctionComponent<PropsWithChildren<Props>> =
                     //            : branchName
                     //   }
                     defaultValue={
-                        environmentNameExists ? `${jiraTicket}-${envLenght + 1}` : jiraTicket
+                        environmentNameExists ? `${projectName}-${envLenght + 1}` : projectName
                     }
                     labelProps={{ srOnly: true }}
                     label="Miljønavn"
@@ -128,7 +139,7 @@ export const NewEnvironmentButton: FunctionComponent<PropsWithChildren<Props>> =
                         //        : branchName
                         //    }
                         defaultValue={
-                            environmentNameExists ? `${jiraTicket}-${envLenght + 1}` : jiraTicket
+                            environmentNameExists ? `${projectName}-${envLenght + 1}` : projectName
                         }
                         className="mb-12"
                         autoFocus

@@ -4,6 +4,7 @@ import type { EnvironmentStatusResponse } from "~/model/gen";
 import type { IssueBean } from "~/model/jira";
 import { getEnvironments, getEnvironmentDetails } from "~/services/environments";
 import { services } from "../_environments.new/model";
+import { toLower } from "lodash";
 
 export interface LoaderData {
     environments: Array<EnvironmentStatusResponse>;
@@ -12,28 +13,18 @@ export interface LoaderData {
 
 export const loader = async ({ params }: LoaderArgs) => {
     const environments = await getEnvironments();
+    const projectName = toLower(params.ticket);
 
-    const projectName = params.ticket;
+    console.log("projectName", projectName);
 
-    const filterParams = [projectName];
     const relevantEnvironments = environments.devnamespaces.filter((env) => {
-        if (!env.appAnnotations) {
-            return false;
-        }
-        const branchMatches = Object.entries(env.appAnnotations).some(([annotationProjectName]) => {
-            const service = services.find((service) => service.namespace === annotationProjectName);
+        console.log("env", env.name);
+        let res = env.name.includes(projectName);
+        console.log("res", res);
+        return res;
 
-            if (!service) {
-                return false;
-            }
-
-            const isSameProject = service.repository === projectName;
-
-            return isSameProject;
-        });
-
-        return filterParams.some((param) => env.name.includes(param));
     });
+    console.log("relevantEnvironments",relevantEnvironments);
 
     const environmentDetailsFetcher = await Promise.all(
         relevantEnvironments.map((env) => getEnvironmentDetails(env.name))

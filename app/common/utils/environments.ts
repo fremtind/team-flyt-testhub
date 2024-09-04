@@ -28,9 +28,6 @@ export const getEnvironmentVariable = (envVariables: Array<Env>, variable: strin
     return envVariables.find((v) => v.name === variable)?.value;
 };
 
-export const generateSwaggerUrl = (host: string) => {
-    return appendBedrift(host) + "api/docs/swagger-ui/index.html?configUrl=/bedrift/api/docs/api-docs/swagger-config";
-};
 
 export const generateHumioUrl = (namespace: string) => {
     return `https://humio.intern.sparebank1.no/fremtind-test/search?live=false&query=%22k8s_namespace%22%20%3D%20%22${namespace}%22&start=24h`;

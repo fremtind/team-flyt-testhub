@@ -13,7 +13,6 @@ const BranchView = () => {
     const params = useParams<"project" | "branchName">();
 
     const loaderData = useLoaderData<LoaderData>();
-    console.log(loaderData);
 
     const data = loaderData.environments;
 
@@ -25,7 +24,6 @@ const BranchView = () => {
     });
 
     const environmentNames = environmentsSortedByCreation.map((env) => env.environment.name);
-    console.log(environmentNames)
 
     const jiraIssue = getJiraIssueFromString(params.branchName!);
 
