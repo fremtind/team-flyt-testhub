@@ -13,7 +13,7 @@ import { isDefined } from "~/common/utils/isDefined";
 import { services } from "~/routes/_environments.new/model";
 import type { Fip } from "~/common/utils/fip";
 import { fipMap } from "~/common/utils/fip";
-import { secretsForNamespace, redisResources } from "~/common/redisinfo";
+import { secretsForNamespace } from "~/common/redisinfo";
 
 export const getEnvironments = () => {
     return testhubApi.get<EnvironmentListResponse>(`environments/${getRequiredEnvVar("TESTHUB_TEAM")}`)
@@ -25,6 +25,7 @@ export const getEnvironments = () => {
 };
 
 export const getEnvironmentDetails = (environmentNamespace: string) => {
+    
     return testhubApi.get<EnvironmentStatusResponse>(
         `environments/${getRequiredEnvVar("TESTHUB_TEAM")}/${environmentNamespace}`
     ).catch((e) => {
@@ -43,18 +44,20 @@ export const createEnvironment = async (data: EnvironmentDeploymentRequest) => {
     const blob: EnvironmentDeploymentRequest = {
         ...data,
         resourceModifiers: ["AUTHORIZATION_POLICY_FROM_SOURCE_NAMESPACES", "HTTP_ROUTE_DESTINATION"],
-        excludedKinds: ["pginstanceshared","rediscluster", "namespace", "devnamespace"],
-        secrets: secretsForNamespace,
+        excludedKinds: ["pginstanceshared", "namespace", "devnamespace"],
         localServicePaths: localServices,
-        additionalKubernetesResources: redisResources,
+        envFrom: "db-conn",
         omitNamespacePostfix: true,
         omitNamespacePrefix: true,
     };
     
-    return testhubApi.post<EnvironmentStatusResponse, EnvironmentDeploymentRequest>(
+    let res = await testhubApi.post<EnvironmentStatusResponse, EnvironmentDeploymentRequest>(
         `environments/${getRequiredEnvVar("TESTHUB_TEAM")}`,
         blob
     );
+
+    // console.log("Created environment", res);
+    return res;
 };
 
 export const deleteEnvironment = async (namespace: string) => {
@@ -71,7 +74,10 @@ const schema = z.object({
     "flyt-backend": serviceSchema,
     "flyt-gateway": serviceSchema,
     "flyt-jms": serviceSchema,
-    // "flyt-camunda-webapps": serviceSchema,
+    "flyt-camunda-webapps": serviceSchema,
+    "flyt-hv-service": serviceSchema,
+    "flyt-communication": serviceSchema,
+    "flyt-search-service": serviceSchema,
     hoursToLive: z.coerce.number().default(24 * 5),
     fip: z.string({ required_error: "Du må velge FIP-miljø" }).nonempty({ message: "Du må velge FIP-miljø" }),
     context: z
@@ -93,13 +99,15 @@ export const createEnvironmentPayload = (data: z.infer<typeof schema>) => {
     const appList = services.map((service) => {
         const [branch, commitHash] = apps[service.inputName] ?? ["", ""];
         if (commitHash) {
-            return createAppDefinition(service.namespace, commitHash, branch, fip as Fip);
+            return createAppDefinition(service.namespace, branch, fip as Fip);
         } else {
             if (service.required) {
-                return createAppDefinition(service.namespace, "", "", fip as Fip);
+                return createAppDefinition(service.namespace, "", fip as Fip, service.envVars);
             }
         }
     });
+
+    console.log("appList", appList);
 
     const payload = {
         context,
@@ -112,17 +120,15 @@ export const createEnvironmentPayload = (data: z.infer<typeof schema>) => {
 
 const createAppDefinition = (
     name: (typeof services)[number]["namespace"],
-    commitHash: string,
     branch: string,
-    fip: Fip
+    fip: Fip,
+    envVariables: { [key: string]: string }
 ) => {
 
     const envVars:{ [key: string]: string }= {
+            ...envVariables,
             "forsikring.fip.url-aws": fipMap[fip].aws,
             "forsikring.fip.url-on-prem": fipMap[fip].onPrem,
-            "spring.data.redis.cluster.nodes": "",
-            "QUARKUS_REDIS_HOSTS": "redis://$(REDIS_HOST):$(REDIS_PORT)",
-            "QUARKUS_REDIS_CLIENT_TYPE": "standalone",
             };
             
     
@@ -130,13 +136,9 @@ const createAppDefinition = (
         name,
         environmentVariables: envVars,
         annotations: {
-            branch: branch || "main",
+            branch: branch || "develop",
         }
     };
-
-    if (commitHash) {
-        app.image = getEcrURI(app.name, `${branch}-${commitHash}`);
-    }
 
     return app;
 };

@@ -54,6 +54,7 @@ const ProjectView = () => {
 
                 <section>
                     <h3 className="j-h4 mb-12">Tilgjengelige miljøer</h3>
+                    {console.log("env", environmentsSortedByCreation)}
                     {environmentsSortedByCreation.length ? (
                         environmentsSortedByCreation.map((env, index) => (
                             <>

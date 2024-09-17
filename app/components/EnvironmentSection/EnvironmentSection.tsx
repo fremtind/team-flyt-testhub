@@ -1,7 +1,7 @@
 import { useRef } from "react";
 import { useSubmit } from "@remix-run/react";
 import { getFipLabelByUrl } from "~/common/utils/fip";
-import type { EnvironmentDetailsStatus, RoutesInfo } from "../../model/gen";
+import type { EnvironmentDetailsStatus } from "../../model/gen";
 import { InfoTag, SuccessTag } from "@fremtind/jkl-tag-react";
 import { PrimaryButton, SecondaryButton } from "@fremtind/jkl-button-react";
 
@@ -23,13 +23,11 @@ interface Props {
 export const EnvironmentSection = ({ environment }: Props) => {
     const appDialogRef = useRef<ModalInstance | null>();
     const jsonDialogRef = useRef<ModalInstance | null>();
-    const dialogRef = useRef<ModalInstance | null>();
 
     const submit = useSubmit();
 
     const frontendApp = getAppFromEnvironment(environment.apps, "flyt-frontend");
-    const webApp = getAppFromEnvironment(environment.apps, "forsikring-bm-web");
-    const apiGwApp = getAppFromEnvironment(environment.apps, "forsikring-bm-api-gw");
+    const gatewayApp = getAppFromEnvironment(environment.apps, "flyt-gateway");
 
     const handleDeleteEnvironment = () => {
         if (!confirm("Er du sikker på at du vil slette dette miljøet?")) {
@@ -69,6 +67,12 @@ export const EnvironmentSection = ({ environment }: Props) => {
                             <ContextualMenuItem onClick={handleDeleteEnvironment}>Slett</ContextualMenuItem>
                         </ContextualMenu>
                     </div>
+                    <SecondaryButton density="compact" onClick={handleDeleteEnvironment}>Slett</SecondaryButton>
+                    <SecondaryButton density="compact" onClick={(e) => {
+                                    e.stopPropagation();
+                                    jsonDialogRef.current?.show();
+                                }}>Vis JSON
+                    </SecondaryButton>
                 </div>
                 <div className="flex gap-40">
                     Ingen apper definert i Kubernetes 🧐
@@ -78,7 +82,7 @@ export const EnvironmentSection = ({ environment }: Props) => {
         );
     }
 
-    const fipAppUrl = getEnvironmentVariable(webApp?.env ?? [], "FORSIKRING_FIP_URL");
+    const fipAppUrl = (gatewayApp?.env ?? []).find((env) => env.name === "forsikring.fip.url-aws")?.value;
 
 
     const copyJsonToClipboard = () => {
@@ -127,7 +131,23 @@ export const EnvironmentSection = ({ environment }: Props) => {
                         </ContextualMenuItem>
                         <ContextualMenuItem onClick={handleDeleteEnvironment}>Slett</ContextualMenuItem>
                     </ContextualMenu>
+                
                 </div>
+                <SecondaryButton density="compact"onClick={handleDeleteEnvironment}>Slett</SecondaryButton>
+                <SecondaryButton density="compact"
+                            onClick={() => {
+                                appDialogRef.current?.show();
+                            }}>
+                                Oversikt over tjenestene
+                </SecondaryButton>
+                <SecondaryButton density="compact" 
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        jsonDialogRef.current?.show();
+                    }}>
+                        Vis JSON
+                </SecondaryButton>
+                
             </div>
             <div className="mt-24 flex gap-24 flex-col">
                   <div className="text-base flex flex-col gap-4">
@@ -136,8 +156,7 @@ export const EnvironmentSection = ({ environment }: Props) => {
                         <div>Utløper: {format(new Date(environment.expires), "dd-MM-yyyy HH:mm")}</div>
                         {fipAppUrl && (
                             <>
-                                <dt>FIP-miljø</dt>
-                                <dd>{getFipLabelByUrl(fipAppUrl)}</dd>
+                                <div>FIP-miljø: {getFipLabelByUrl(fipAppUrl)}</div>
                             </>
                         )}
                 </div>
@@ -158,7 +177,6 @@ export const EnvironmentSection = ({ environment }: Props) => {
             )}
                 </div>
             </div>
-
             <Dialog
                 title="JSON"
                 dialogRef={(instance) => {

@@ -26,4 +26,5 @@ export type EnvironmentDeploymentRequest = {
     omitNamespacePrefix?: boolean;
     omitNamespacePostfix?: boolean;
     additionalKubernetesResources?: Array<string>;
+    envFrom?: string;
 };

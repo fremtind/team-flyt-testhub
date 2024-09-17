@@ -7,6 +7,7 @@ export const getIssue = async (issueId: string) => {
 
 export const getIssuesFromColumn = async (columnId: string) => {
     // let res = await jiraApi.get<any>(`search?jql=project="FLYT&fields=id`);
+    //search?jql=project=FLYT&status=10055&fields=id,summary
     // console.log(res.issues);
 
     let mock = [

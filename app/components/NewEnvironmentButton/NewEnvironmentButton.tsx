@@ -53,8 +53,10 @@ export const NewEnvironmentButton: FunctionComponent<PropsWithChildren<Props>> =
         setEnvLength(environmentNames ? environmentNames?.length : 0);
     }, [navigation, add, isDialogOpen, environmentNames, envLenght]);
     const jiraTicket = toLower(project)
+    console.log("environmentNames", environmentNames)
     const projectName = jiraTicket  + "-" + name;
-    const splitEnvironments = environmentNames?.map((env) => env.split("-"));
+    const splitEnvironments = environmentNames?.map((env) => env?.split("-"));
+    console.log("splitEnvironments", splitEnvironments)
     splitEnvironments?.forEach((env) => {
         env.pop();
         env.shift();
@@ -69,9 +71,9 @@ export const NewEnvironmentButton: FunctionComponent<PropsWithChildren<Props>> =
             <Form action="." method="POST">
                 <TextInput
                     hidden
-                    name="flyt-backend"
+                    name={jiraTicket}
                     className="jkl-sr-only"
-                    value={project}
+                    value={projectName}
                     readOnly
                     labelProps={{ srOnly: true }}
                     label="project"
@@ -89,7 +91,7 @@ export const NewEnvironmentButton: FunctionComponent<PropsWithChildren<Props>> =
                     //            : branchName
                     //   }
                     defaultValue={
-                        environmentNameExists ? `${projectName}-${envLenght + 1}` : projectName
+                        environmentNameExists ? `${projectName}` : projectName
                     }
                     labelProps={{ srOnly: true }}
                     label="Miljønavn"
@@ -139,7 +141,7 @@ export const NewEnvironmentButton: FunctionComponent<PropsWithChildren<Props>> =
                         //        : branchName
                         //    }
                         defaultValue={
-                            environmentNameExists ? `${projectName}-${envLenght + 1}` : projectName
+                            environmentNameExists ? `${projectName}` : projectName
                         }
                         className="mb-12"
                         autoFocus

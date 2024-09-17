@@ -4,14 +4,14 @@ import { emitter } from "../services/emitter";
 import { environmentDetailsStatus } from "../services/environmentCache";
 
 export const loader = ({ request, params }: LoaderFunctionArgs) => {
-    const branch = params["*"];
+    const ticket = params["*"];
 
-    if (!branch) {
+    if (!ticket) {
         return null;
     }
 
-    if (!environmentDetailsStatus.has(branch)) {
-        environmentDetailsStatus.set(branch, []);
+    if (!environmentDetailsStatus.has(ticket)) {
+        environmentDetailsStatus.set(ticket, []);
     }
 
     return eventStream(request.signal, (send) => {
@@ -19,9 +19,9 @@ export const loader = ({ request, params }: LoaderFunctionArgs) => {
             send({ data: JSON.stringify(message) });
         };
 
-        emitter.addListener(branch, handler);
+        emitter.addListener(ticket, handler);
         return () => {
-            emitter.removeListener(branch, handler);
+            emitter.removeListener(ticket, handler);
         };
     });
 };
